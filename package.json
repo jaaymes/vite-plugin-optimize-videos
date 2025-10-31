@@ -1,0 +1,42 @@
+{
+  "name": "vite-plugin-optimize-videos",
+  "version": "1.0.0",
+  "description": "Plugin Vite para otimizar vídeos mantendo o formato de entrada (mp4, webm, mov, avi)",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "video",
+    "optimization",
+    "ffmpeg"
+  ],
+  "author": "Jaymes Costa <jaaymes@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "peerDependencies": {
+    "vite": ">=4"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "1.1.0",
+    "@ffprobe-installer/ffprobe": "2.1.2",
+    "fluent-ffmpeg": "2.1.3"
+  },
+  "devDependencies": {
+    "@types/fluent-ffmpeg": "2.1.28",
+    "@types/node": "24.9.2",
+    "typescript": "5.9.3",
+    "vite": "7.1.12"
+  }
+}
