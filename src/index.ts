@@ -21,7 +21,6 @@ interface OptimizeVideosOptions {
   exclude?: (VideoExtension | string)[];
   quality?: number;
   preset?: string;
-  videoDir?: string;
   ".mp4"?: VideoFormatOptions;
   ".webm"?: VideoFormatOptions;
   ".mov"?: VideoFormatOptions;
@@ -185,36 +184,41 @@ const optimizeVideo = async (
 };
 
 export const optimizeVideos = (options: OptimizeVideosOptions = {}): Plugin => {
-  const { exclude = [], videoDir = "public" } = options;
-  let rootDir: string;
-  let videoDirectory: string;
+  const { exclude = [] } = options;
+  let distDir: string;
   return {
     name: "vite-plugin-optimize-videos",
     apply: "build",
     configResolved(config) {
-      rootDir = config.root;
-      // Resolve videoDir: se for absoluto, usa direto; senão resolve relativo ao root
-      videoDirectory = path.isAbsolute(videoDir)
-        ? videoDir
-        : path.resolve(rootDir, videoDir);
+      distDir = path.resolve(config.root, config.build.outDir);
     },
     async closeBundle() {
-      if (!videoDirectory || !existsSync(videoDirectory)) {
+      if (!distDir || !existsSync(distDir)) {
         return;
       }
-      const videoFiles = await findVideoFiles(videoDirectory, exclude);
+      const videoFiles = await findVideoFiles(distDir, exclude);
       if (videoFiles.length === 0) {
         return;
       }
+
+      console.log("\n🎬 " + "\x1b[1m" + "Video Optimization" + "\x1b[0m");
       console.log(
-        `🎬 Encontrados ${videoFiles.length} arquivo(s) de vídeo para otimizar`
+        "\x1b[36m" +
+          `   Found ${videoFiles.length} video file(s) to optimize` +
+          "\x1b[0m\n"
       );
+
       for (const videoFile of videoFiles) {
         const fileName = path.basename(videoFile);
         const ext = path.extname(videoFile).toLowerCase();
         const tempOutputPath = `${videoFile}.tmp${ext}`;
         try {
-          console.log(`⚡ Otimizando: ${fileName}`);
+          console.log(
+            "\x1b[33m" +
+              `⚡ Optimizing: ` +
+              "\x1b[0m" +
+              `\x1b[1m${fileName}\x1b[0m`
+          );
           const videoOptions = getVideoOptions(ext, options);
           const { originalSize, optimizedSize } = await optimizeVideo(
             videoFile,
@@ -224,27 +228,35 @@ export const optimizeVideos = (options: OptimizeVideosOptions = {}): Plugin => {
           const reduction = ((1 - optimizedSize / originalSize) * 100).toFixed(
             1
           );
+          const originalMB = (originalSize / 1024 / 1024).toFixed(2);
+          const optimizedMB = (optimizedSize / 1024 / 1024).toFixed(2);
           console.log(
-            `✅ ${fileName}: ${(originalSize / 1024 / 1024).toFixed(2)} MB → ${(
-              optimizedSize /
-              1024 /
-              1024
-            ).toFixed(2)} MB (${reduction}% menor)`
+            "\x1b[32m" +
+              `✅ ${fileName}\n` +
+              "\x1b[0m" +
+              `   ${originalMB} MB → ${optimizedMB} MB ` +
+              "\x1b[32m" +
+              `(${reduction}% smaller)` +
+              "\x1b[0m\n"
           );
           await unlink(videoFile);
           await writeFile(videoFile, await readFile(tempOutputPath));
           await unlink(tempOutputPath);
         } catch (error) {
           console.error(
-            `❌ Erro ao otimizar ${fileName}:`,
-            error instanceof Error ? error.message : String(error)
+            "\x1b[31m" +
+              `❌ Error optimizing ${fileName}:\n` +
+              "\x1b[0m" +
+              `   ${error instanceof Error ? error.message : String(error)}\n`
           );
           if (existsSync(tempOutputPath)) {
             await unlink(tempOutputPath);
           }
         }
       }
-      console.log("🎉 Otimização de vídeos concluída!");
+      console.log(
+        "\x1b[32m" + "🎉 Video optimization completed!" + "\x1b[0m\n"
+      );
     },
   };
 };

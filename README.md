@@ -14,8 +14,7 @@ A Vite plugin to optimize videos while maintaining the same input format (mp4, w
 - ⚙️ Per-format quality adjustment
 - 🚀 Automatic preset (optional)
 - 📦 Uses embedded ffmpeg/ffprobe (no external installation required)
-- 📁 Configurable source directory (defaults to `public`)
-- 🎯 Supports path aliases and custom paths
+- 📁 Automatically optimizes videos in the build output directory (dist)
 
 ### Installation
 
@@ -51,39 +50,11 @@ export default defineConfig({
 ```
 
 The plugin will automatically:
-- Scan the `public` directory (default) for video files
+- Scan the build output directory (dist) for video files
 - Optimize all found videos during the build process
 - Maintain the original format of each video
 
 ### Advanced Usage
-
-#### Custom Source Directory
-
-By default, the plugin scans the `public` directory. You can specify a custom directory:
-
-```ts
-import { defineConfig } from 'vite'
-import { optimizeVideos } from 'vite-plugin-optimize-videos'
-import path from 'path'
-
-export default defineConfig({
-  plugins: [
-    optimizeVideos({
-      // Using a relative path (resolved from project root)
-      videoDir: './src/assets/videos',
-      
-      // Or using path.resolve
-      // videoDir: path.resolve(__dirname, 'src/assets/videos'),
-      
-      // Or using an absolute path
-      // videoDir: '/absolute/path/to/videos',
-      
-      // Or using Vite alias (you can reference your project's alias)
-      // videoDir: '@assets/videos'
-    })
-  ]
-})
-```
 
 #### Per-Format Configuration (Recommended)
 
@@ -96,7 +67,6 @@ import { optimizeVideos } from 'vite-plugin-optimize-videos'
 export default defineConfig({
   plugins: [
     optimizeVideos({
-      videoDir: 'public',
       exclude: ['.gif'], // Exclude animated GIFs that might have .mp4 extension
       '.mp4': {
         quality: 18,      // High quality
@@ -130,7 +100,6 @@ import { optimizeVideos } from 'vite-plugin-optimize-videos'
 export default defineConfig({
   plugins: [
     optimizeVideos({
-      videoDir: 'public',
       exclude: [],
       quality: 18,        // Global quality (default: 18)
       preset: 'medium'     // Global preset (default: 'medium')
@@ -157,23 +126,6 @@ export default defineConfig({
 ```
 
 ### Options
-
-#### `videoDir` (optional)
-- **Type**: `string`
-- **Default**: `"public"`
-- **Description**: Directory to scan for video files. Can be:
-  - A relative path (resolved from project root)
-  - An absolute path
-  - A path using Vite aliases from your project
-  - A path resolved with `path.resolve()`
-
-**Examples:**
-```ts
-videoDir: 'public'                           // Default
-videoDir: './src/assets'                    // Relative path
-videoDir: path.resolve(__dirname, 'videos') // Using path.resolve
-videoDir: '/absolute/path/to/videos'        // Absolute path
-```
 
 #### `exclude` (optional)
 - **Type**: `(".mp4" | ".webm" | ".mov" | ".avi" | string)[]`
@@ -244,16 +196,17 @@ optimizeVideos({
 - Files are written atomically (temporary file with same extension, replaced after success)
 - If you don't specify `quality` or `preset`, default values are used automatically (quality: 18, preset: "medium")
 - The plugin only runs during the build process (`apply: "build"`)
-- Videos are optimized in-place in the source directory
+- Videos are optimized in-place in the build output directory (dist)
 
 ### How It Works
 
-1. During the build process, the plugin scans the specified directory (default: `public`)
-2. Finds all video files matching supported formats
-3. Applies format-specific or global optimization settings
-4. Optimizes each video using ffmpeg
-5. Replaces the original file with the optimized version
-6. Logs optimization results (file sizes and reduction percentage)
+1. During the build process, the plugin automatically detects the build output directory (dist)
+2. Scans the dist directory for video files
+3. Finds all video files matching supported formats
+4. Applies format-specific or global optimization settings
+5. Optimizes each video using ffmpeg
+6. Replaces the original file with the optimized version
+7. Logs optimization results (file sizes and reduction percentage)
 
 ### Output Example
 
@@ -325,8 +278,7 @@ MIT
 - ⚙️ Ajuste de qualidade por formato de vídeo
 - 🚀 Preset automático (opcional)
 - 📦 Usa ffmpeg/ffprobe embutidos (sem instalação externa necessária)
-- 📁 Diretório de origem configurável (padrão: `public`)
-- 🎯 Suporte a aliases de caminho e caminhos customizados
+- 📁 Otimiza automaticamente os vídeos no diretório de build (dist)
 
 ### Instalação
 
@@ -362,39 +314,11 @@ export default defineConfig({
 ```
 
 O plugin irá automaticamente:
-- Escanear o diretório `public` (padrão) em busca de arquivos de vídeo
+- Escanear o diretório de build (dist) em busca de arquivos de vídeo
 - Otimizar todos os vídeos encontrados durante o processo de build
 - Manter o formato original de cada vídeo
 
 ### Uso Avançado
-
-#### Diretório de Origem Customizado
-
-Por padrão, o plugin escaneia o diretório `public`. Você pode especificar um diretório customizado:
-
-```ts
-import { defineConfig } from 'vite'
-import { optimizeVideos } from 'vite-plugin-optimize-videos'
-import path from 'path'
-
-export default defineConfig({
-  plugins: [
-    optimizeVideos({
-      // Usando um caminho relativo (resolvido a partir da raiz do projeto)
-      videoDir: './src/assets/videos',
-      
-      // Ou usando path.resolve
-      // videoDir: path.resolve(__dirname, 'src/assets/videos'),
-      
-      // Ou usando um caminho absoluto
-      // videoDir: '/caminho/absoluto/para/videos',
-      
-      // Ou usando alias do Vite (você pode referenciar o alias do seu projeto)
-      // videoDir: '@assets/videos'
-    })
-  ]
-})
-```
 
 #### Configuração por Formato (Recomendado)
 
@@ -407,7 +331,6 @@ import { optimizeVideos } from 'vite-plugin-optimize-videos'
 export default defineConfig({
   plugins: [
     optimizeVideos({
-      videoDir: 'public',
       exclude: ['.gif'], // Excluir GIFs animados que possam ter extensão .mp4
       '.mp4': {
         quality: 18,      // Alta qualidade
@@ -441,7 +364,6 @@ import { optimizeVideos } from 'vite-plugin-optimize-videos'
 export default defineConfig({
   plugins: [
     optimizeVideos({
-      videoDir: 'public',
       exclude: [],
       quality: 18,        // Qualidade global (padrão: 18)
       preset: 'medium'     // Preset global (padrão: 'medium')
@@ -468,23 +390,6 @@ export default defineConfig({
 ```
 
 ### Opções
-
-#### `videoDir` (opcional)
-- **Tipo**: `string`
-- **Padrão**: `"public"`
-- **Descrição**: Diretório para escanear arquivos de vídeo. Pode ser:
-  - Um caminho relativo (resolvido a partir da raiz do projeto)
-  - Um caminho absoluto
-  - Um caminho usando aliases do Vite do seu projeto
-  - Um caminho resolvido com `path.resolve()`
-
-**Exemplos:**
-```ts
-videoDir: 'public'                           // Padrão
-videoDir: './src/assets'                     // Caminho relativo
-videoDir: path.resolve(__dirname, 'videos')  // Usando path.resolve
-videoDir: '/caminho/absoluto/para/videos'    // Caminho absoluto
-```
 
 #### `exclude` (opcional)
 - **Tipo**: `(".mp4" | ".webm" | ".mov" | ".avi" | string)[]`
@@ -555,16 +460,17 @@ optimizeVideos({
 - Os arquivos são escritos de forma atômica (arquivo temporário com mesma extensão e substituição após sucesso)
 - Se você não especificar `quality` ou `preset`, os valores padrão serão usados automaticamente (quality: 18, preset: "medium")
 - O plugin só executa durante o processo de build (`apply: "build"`)
-- Os vídeos são otimizados in-place no diretório de origem
+- Os vídeos são otimizados in-place no diretório de build (dist)
 
 ### Como Funciona
 
-1. Durante o processo de build, o plugin escaneia o diretório especificado (padrão: `public`)
-2. Encontra todos os arquivos de vídeo que correspondem aos formatos suportados
-3. Aplica configurações de otimização específicas do formato ou globais
-4. Otimiza cada vídeo usando ffmpeg
-5. Substitui o arquivo original pela versão otimizada
-6. Registra os resultados da otimização (tamanhos de arquivo e percentual de redução)
+1. Durante o processo de build, o plugin detecta automaticamente o diretório de build (dist)
+2. Escaneia o diretório dist em busca de arquivos de vídeo
+3. Encontra todos os arquivos de vídeo que correspondem aos formatos suportados
+4. Aplica configurações de otimização específicas do formato ou globais
+5. Otimiza cada vídeo usando ffmpeg
+6. Substitui o arquivo original pela versão otimizada
+7. Registra os resultados da otimização (tamanhos de arquivo e percentual de redução)
 
 ### Exemplo de Saída
 
