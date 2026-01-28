@@ -54,14 +54,18 @@ optimizeVideos({
 
 ### Configuration
 
-| Option    | Type       | Default    | Description                                                |
-| --------- | ---------- | ---------- | ---------------------------------------------------------- |
-| `quality` | `number`   | `18`       | CRF value. Lower = better quality/larger file. Rec: 18-23. |
-| `preset`  | `string`   | `'medium'` | Encoding speed: `fast`, `medium`, `slow`.                  |
-| `exclude` | `string[]` | `[]`       | Patterns/Extensions to skip (e.g. `['intro', 'test']`).    |
-| `.<ext>`  | `object`   | -          | Format overrides (`.mp4`, `.webm`, `.mov`, `.avi`).        |
+### Configuration
 
-> **Note:** Auido is removed from optimized videos.
+| Option        | Type       | Default    | Description                                                   |
+| ------------- | ---------- | ---------- | ------------------------------------------------------------- |
+| `quality`     | `number`   | `18`       | CRF value. Lower = better quality/larger file. Rec: 18-23.    |
+| `preset`      | `string`   | `'medium'` | Encoding speed: `fast`, `medium`, `slow`.                     |
+| `mute`        | `boolean`  | `false`    | Set to `true` to remove audio. **Defaults to keeping audio.** |
+| `concurrency` | `number`   | `4`        | Number of videos to process in parallel.                      |
+| `exclude`     | `string[]` | `[]`       | Patterns/Extensions to skip (e.g. `['intro', 'test']`).       |
+| `.<ext>`      | `object`   | -          | Format overrides (`.mp4`, `.webm`, `.mov`, `.avi`).           |
+
+> **Note:** Audio is PRESERVED by default. Use `mute: true` to remove it.
 
 ---
 
@@ -72,6 +76,7 @@ optimizeVideos({
 - 🎬 **Preservação de Formato**: Mantém o container original (mp4, webm, mov, avi).
 - 📦 **Zero Configuração**: Funciona direto com ffmpeg embutido.
 - ⚙️ **Controle Granular**: Ajuste qualidade/presets globalmente ou por formato.
+- ⚡ **Processamento Paralelo**: Otimiza vários vídeos simultaneamente.
 - 📁 **Auto-Descoberta**: Encontra e otimiza vídeos na pasta `dist` automaticamente.
 
 ### Instalação
@@ -99,6 +104,8 @@ export default defineConfig({
 ```ts
 optimizeVideos({
   quality: 20, // Padrão global
+  mute: true, // Remover áudio (padrão é false/manter)
+  concurrency: 2, // Processar 2 vídeos por vez
   exclude: ["intro.mp4"], // Ignorar arquivos
   ".mp4": {
     quality: 18, // Sobrescrever para mp4
@@ -110,14 +117,16 @@ optimizeVideos({
 
 ### Configuração
 
-| Opção     | Tipo       | Padrão     | Descrição                                                      |
-| --------- | ---------- | ---------- | -------------------------------------------------------------- |
-| `quality` | `number`   | `18`       | Valor CRF. Menor = melhor qualidade/arquivo maior. Rec: 18-23. |
-| `preset`  | `string`   | `'medium'` | Velocidade: `fast`, `medium`, `slow`.                          |
-| `exclude` | `string[]` | `[]`       | Padrões/Extensões para pular (ex: `['intro', 'teste']`).       |
-| `.<ext>`  | `object`   | -          | Ajustes por formato (`.mp4`, `.webm`, `.mov`, `.avi`).         |
+| Opção         | Tipo       | Padrão     | Descrição                                                      |
+| ------------- | ---------- | ---------- | -------------------------------------------------------------- |
+| `quality`     | `number`   | `18`       | Valor CRF. Menor = melhor qualidade/arquivo maior. Rec: 18-23. |
+| `preset`      | `string`   | `'medium'` | Velocidade: `fast`, `medium`, `slow`.                          |
+| `mute`        | `boolean`  | `false`    | Defina como `true` para remover o áudio. **Padrão: manter.**   |
+| `concurrency` | `number`   | `4`        | Número de vídeos para processar em paralelo.                   |
+| `exclude`     | `string[]` | `[]`       | Padrões/Extensões para pular (ex: `['intro', 'teste']`).       |
+| `.<ext>`      | `object`   | -          | Ajustes por formato (`.mp4`, `.webm`, `.mov`, `.avi`).         |
 
-> **Nota:** O áudio é removido dos vídeos otimizados.
+> **Nota:** O áudio é MANTIDO por padrão. Use `mute: true` para removê-lo.
 
 ---
 
