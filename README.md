@@ -1,8 +1,11 @@
 # vite-plugin-optimize-videos
 
-A Vite plugin to optimize videos while maintaining the same input format (mp4, webm, mov, avi).
+[![npm version](https://badge.fury.io/js/vite-plugin-optimize-videos.svg)](https://badge.fury.io/js/vite-plugin-optimize-videos)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[🇧🇷 Português](#português-brasil) • [🇺🇸 English](#english)
+A Vite plugin to optimize videos during build, maintaining input formats (mp4, webm, mov, avi).
+
+[🇧🇷 Português](#português-brasil) | [🇺🇸 English](#english)
 
 ---
 
@@ -10,263 +13,55 @@ A Vite plugin to optimize videos while maintaining the same input format (mp4, w
 
 ### Features
 
-- 🎬 Maintains the output container equal to input (mp4, webm, mov, avi)
-- ⚙️ Per-format quality adjustment
-- 🚀 Automatic preset (optional)
-- 📦 Uses embedded ffmpeg/ffprobe (no external installation required)
-- 📁 Automatically optimizes videos in the build output directory (dist)
+- 🎬 **Format Preservation**: Keeps original container (mp4, webm, mov, avi).
+- 📦 **Zero Config**: Works out of the box with embedded ffmpeg.
+- ⚙️ **Granular Control**: Configure quality/presets globally or per-format.
+- 📁 **Auto-Discovery**: Automatically finds and optimizes videos in `dist`.
 
 ### Installation
 
 ```bash
 pnpm add -D vite-plugin-optimize-videos
+# or npm / yarn
 ```
 
-or
+### Usage
 
-```bash
-npm install -D vite-plugin-optimize-videos
-```
-
-or
-
-```bash
-yarn add -D vite-plugin-optimize-videos
-```
-
-### Basic Usage
-
-Add the plugin to your `vite.config.ts`:
+**Basic** (Defaults: quality 18, medium preset)
 
 ```ts
-import { defineConfig } from 'vite'
-import { optimizeVideos } from 'vite-plugin-optimize-videos'
+// vite.config.ts
+import { optimizeVideos } from "vite-plugin-optimize-videos";
 
 export default defineConfig({
-  plugins: [
-    optimizeVideos()
-  ]
-})
+  plugins: [optimizeVideos()],
+});
 ```
 
-The plugin will automatically:
-- Scan the build output directory (dist) for video files
-- Optimize all found videos during the build process
-- Maintain the original format of each video
+**Advanced**
 
-### Advanced Usage
-
-#### Per-Format Configuration (Recommended)
-
-Configure quality and preset for each video format:
-
-```ts
-import { defineConfig } from 'vite'
-import { optimizeVideos } from 'vite-plugin-optimize-videos'
-
-export default defineConfig({
-  plugins: [
-    optimizeVideos({
-      exclude: ['.gif'], // Exclude animated GIFs that might have .mp4 extension
-      '.mp4': {
-        quality: 18,      // High quality
-        preset: 'medium'   // Balanced encoding speed
-      },
-      '.webm': {
-        quality: 20,       // Slightly lower quality for webm
-        preset: 'fast'     // Faster encoding
-      },
-      '.mov': {
-        quality: 18,
-        preset: 'slow'     // Best compression, slower encoding
-      },
-      '.avi': {
-        quality: 18,
-        preset: 'medium'
-      }
-    })
-  ]
-})
-```
-
-#### Global Configuration
-
-Set global quality and preset (used when format-specific config is not provided):
-
-```ts
-import { defineConfig } from 'vite'
-import { optimizeVideos } from 'vite-plugin-optimize-videos'
-
-export default defineConfig({
-  plugins: [
-    optimizeVideos({
-      exclude: [],
-      quality: 18,        // Global quality (default: 18)
-      preset: 'medium'     // Global preset (default: 'medium')
-    })
-  ]
-})
-```
-
-#### Minimal Configuration
-
-Use default settings for everything:
-
-```ts
-import { defineConfig } from 'vite'
-import { optimizeVideos } from 'vite-plugin-optimize-videos'
-
-export default defineConfig({
-  plugins: [
-    optimizeVideos({
-      exclude: [] // No exclusions
-    })
-  ]
-})
-```
-
-### Options
-
-#### `exclude` (optional)
-- **Type**: `(".mp4" | ".webm" | ".mov" | ".avi" | string)[]`
-- **Default**: `[]`
-- **Description**: Patterns to exclude from optimization. Accepts:
-  - Video extension types (`.mp4`, `.webm`, `.mov`, `.avi`)
-  - Generic strings to exclude by filename
-
-**Examples:**
-```ts
-exclude: ['.gif']              // Exclude files with .gif extension
-exclude: ['demo', 'test']      // Exclude files containing 'demo' or 'test' in name
-exclude: ['.mp4', 'backup']    // Exclude .mp4 files and files with 'backup' in name
-```
-
-#### `quality` (optional)
-- **Type**: `number`
-- **Default**: `18`
-- **Description**: Global video quality (CRF value). Used when not specified per format.
-  - Lower values = higher quality/larger files (18-23 recommended)
-  - Higher values = lower quality/smaller files (24-28)
-
-#### `preset` (optional)
-- **Type**: `string`
-- **Default**: `"medium"`
-- **Description**: Global encoding speed preset. Used when not specified per format.
-  - `"slow"` - Best compression, smaller files, slower encoding
-  - `"medium"` - Good balance between speed and quality (recommended)
-  - `"fast"` - Faster encoding, larger files
-
-#### Format-Specific Options
-
-Each format (`.mp4`, `.webm`, `.mov`, `.avi`) can have its own configuration:
-
-##### `".mp4"` | `".webm"` | `".mov"` | `".avi"` (optional)
-- **Type**: `VideoFormatOptions`
-- **Description**: Format-specific optimization settings
-
-**VideoFormatOptions:**
-- `quality?: number` - Quality for this format (overrides global)
-- `preset?: string` - Preset for this format (overrides global)
-
-**Example:**
 ```ts
 optimizeVideos({
-  quality: 20,           // Global fallback
-  '.mp4': {
-    quality: 18,         // Override for MP4
-    preset: 'slow'       // Override preset for MP4
+  quality: 20, // Global default
+  exclude: ["intro.mp4"], // Skip files
+  ".mp4": {
+    quality: 18, // Override for mp4
+    preset: "slow", // Slower encoding, better compression
   },
-  '.webm': {
-    quality: 22          // Uses global preset: 'medium'
-  }
-})
+  ".webm": { quality: 25 },
+});
 ```
 
-### Supported Formats
+### Configuration
 
-- **.mp4** (H.264 codec)
-- **.webm** (VP9 codec)
-- **.mov** (H.264 codec)
-- **.avi** (H.264 codec)
+| Option    | Type       | Default    | Description                                                |
+| --------- | ---------- | ---------- | ---------------------------------------------------------- |
+| `quality` | `number`   | `18`       | CRF value. Lower = better quality/larger file. Rec: 18-23. |
+| `preset`  | `string`   | `'medium'` | Encoding speed: `fast`, `medium`, `slow`.                  |
+| `exclude` | `string[]` | `[]`       | Patterns/Extensions to skip (e.g. `['intro', 'test']`).    |
+| `.<ext>`  | `object`   | -          | Format overrides (`.mp4`, `.webm`, `.mov`, `.avi`).        |
 
-### Notes
-
-- For `.webm`, VP9 codec is used with CRF quality and `-b:v 0`
-- Audio is removed from optimized videos
-- Files are written atomically (temporary file with same extension, replaced after success)
-- If you don't specify `quality` or `preset`, default values are used automatically (quality: 18, preset: "medium")
-- The plugin only runs during the build process (`apply: "build"`)
-- Videos are optimized in-place in the build output directory (dist)
-
-### How It Works
-
-1. During the build process, the plugin automatically detects the build output directory (dist)
-2. Scans the dist directory for video files
-3. Finds all video files matching supported formats
-4. Applies format-specific or global optimization settings
-5. Optimizes each video using ffmpeg
-6. Replaces the original file with the optimized version
-7. Logs optimization results (file sizes and reduction percentage)
-
-### Output Example
-
-```
-🎬 Encontrados 3 arquivo(s) de vídeo para otimizar
-⚡ Otimizando: video1.mp4
-✅ video1.mp4: 15.23 MB → 8.45 MB (44.5% menor)
-⚡ Otimizando: video2.webm
-✅ video2.webm: 22.10 MB → 12.30 MB (44.3% menor)
-⚡ Otimizando: demo.mov
-✅ demo.mov: 45.67 MB → 28.90 MB (36.7% menor)
-🎉 Otimização de vídeos concluída!
-```
-
-### Requirements
-
-- Node.js >= 16
-- Vite >= 4
-
-### Contributing
-
-Contributions are welcome! This project is open for improvements and collaboration. Here are some ways you can contribute:
-
-#### Getting Started
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add some amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
-
-#### Areas for Contribution
-
-- 🐛 Bug fixes
-- ✨ New features
-- 📝 Documentation improvements
-- 🧪 Additional test coverage
-- 🎨 Code quality improvements
-- 🌍 Translations
-- 📦 Performance optimizations
-
-#### Ideas for Future Improvements
-
-- [ ] Support for additional video formats (mkv, flv, etc.)
-- [ ] Audio preservation option
-- [ ] Video thumbnail generation
-- [ ] Parallel video processing
-- [ ] Progress reporting for large batches
-- [ ] Cache mechanism to skip already optimized videos
-- [ ] Custom ffmpeg parameters option
-- [ ] Video resizing/resolution options
-- [ ] Support for multiple output formats from single input
-- [ ] Development mode with watch support
-- [ ] Better error handling and recovery
-- [ ] Support for video metadata preservation
-
-### License
-
-MIT
+> **Note:** Auido is removed from optimized videos.
 
 ---
 
@@ -274,260 +69,58 @@ MIT
 
 ### Recursos
 
-- 🎬 Mantém o contêiner de saída igual ao de entrada (mp4, webm, mov, avi)
-- ⚙️ Ajuste de qualidade por formato de vídeo
-- 🚀 Preset automático (opcional)
-- 📦 Usa ffmpeg/ffprobe embutidos (sem instalação externa necessária)
-- 📁 Otimiza automaticamente os vídeos no diretório de build (dist)
+- 🎬 **Preservação de Formato**: Mantém o container original (mp4, webm, mov, avi).
+- 📦 **Zero Configuração**: Funciona direto com ffmpeg embutido.
+- ⚙️ **Controle Granular**: Ajuste qualidade/presets globalmente ou por formato.
+- 📁 **Auto-Descoberta**: Encontra e otimiza vídeos na pasta `dist` automaticamente.
 
 ### Instalação
 
 ```bash
 pnpm add -D vite-plugin-optimize-videos
+# ou npm / yarn
 ```
 
-ou
+### Como Usar
 
-```bash
-npm install -D vite-plugin-optimize-videos
-```
-
-ou
-
-```bash
-yarn add -D vite-plugin-optimize-videos
-```
-
-### Uso Básico
-
-Adicione o plugin no seu `vite.config.ts`:
+**Básico** (Padrões: qualidade 18, preset medium)
 
 ```ts
-import { defineConfig } from 'vite'
-import { optimizeVideos } from 'vite-plugin-optimize-videos'
+// vite.config.ts
+import { optimizeVideos } from "vite-plugin-optimize-videos";
 
 export default defineConfig({
-  plugins: [
-    optimizeVideos()
-  ]
-})
+  plugins: [optimizeVideos()],
+});
 ```
 
-O plugin irá automaticamente:
-- Escanear o diretório de build (dist) em busca de arquivos de vídeo
-- Otimizar todos os vídeos encontrados durante o processo de build
-- Manter o formato original de cada vídeo
+**Avançado**
 
-### Uso Avançado
-
-#### Configuração por Formato (Recomendado)
-
-Configure qualidade e preset para cada formato de vídeo:
-
-```ts
-import { defineConfig } from 'vite'
-import { optimizeVideos } from 'vite-plugin-optimize-videos'
-
-export default defineConfig({
-  plugins: [
-    optimizeVideos({
-      exclude: ['.gif'], // Excluir GIFs animados que possam ter extensão .mp4
-      '.mp4': {
-        quality: 18,      // Alta qualidade
-        preset: 'medium'   // Velocidade de codificação balanceada
-      },
-      '.webm': {
-        quality: 20,       // Qualidade um pouco menor para webm
-        preset: 'fast'     // Codificação mais rápida
-      },
-      '.mov': {
-        quality: 18,
-        preset: 'slow'     // Melhor compressão, codificação mais lenta
-      },
-      '.avi': {
-        quality: 18,
-        preset: 'medium'
-      }
-    })
-  ]
-})
-```
-
-#### Configuração Global
-
-Defina qualidade e preset globais (usados quando a configuração específica do formato não é fornecida):
-
-```ts
-import { defineConfig } from 'vite'
-import { optimizeVideos } from 'vite-plugin-optimize-videos'
-
-export default defineConfig({
-  plugins: [
-    optimizeVideos({
-      exclude: [],
-      quality: 18,        // Qualidade global (padrão: 18)
-      preset: 'medium'     // Preset global (padrão: 'medium')
-    })
-  ]
-})
-```
-
-#### Configuração Mínima
-
-Use configurações padrão para tudo:
-
-```ts
-import { defineConfig } from 'vite'
-import { optimizeVideos } from 'vite-plugin-optimize-videos'
-
-export default defineConfig({
-  plugins: [
-    optimizeVideos({
-      exclude: [] // Sem exclusões
-    })
-  ]
-})
-```
-
-### Opções
-
-#### `exclude` (opcional)
-- **Tipo**: `(".mp4" | ".webm" | ".mov" | ".avi" | string)[]`
-- **Padrão**: `[]`
-- **Descrição**: Padrões para excluir da otimização. Aceita:
-  - Tipos de extensão de vídeo (`.mp4`, `.webm`, `.mov`, `.avi`)
-  - Strings genéricas para excluir por nome de arquivo
-
-**Exemplos:**
-```ts
-exclude: ['.gif']              // Excluir arquivos com extensão .gif
-exclude: ['demo', 'test']      // Excluir arquivos contendo 'demo' ou 'test' no nome
-exclude: ['.mp4', 'backup']    // Excluir arquivos .mp4 e arquivos com 'backup' no nome
-```
-
-#### `quality` (opcional)
-- **Tipo**: `number`
-- **Padrão**: `18`
-- **Descrição**: Qualidade global do vídeo (valor CRF). Usado quando não especificado por formato.
-  - Valores menores = maior qualidade/arquivos maiores (18-23 recomendado)
-  - Valores maiores = menor qualidade/arquivos menores (24-28)
-
-#### `preset` (opcional)
-- **Tipo**: `string`
-- **Padrão**: `"medium"`
-- **Descrição**: Preset global de velocidade de codificação. Usado quando não especificado por formato.
-  - `"slow"` - Melhor compressão, arquivos menores, codificação mais lenta
-  - `"medium"` - Bom equilíbrio entre velocidade e qualidade (recomendado)
-  - `"fast"` - Codificação mais rápida, arquivos maiores
-
-#### Opções Específicas por Formato
-
-Cada formato (`.mp4`, `.webm`, `.mov`, `.avi`) pode ter sua própria configuração:
-
-##### `".mp4"` | `".webm"` | `".mov"` | `".avi"` (opcional)
-- **Tipo**: `VideoFormatOptions`
-- **Descrição**: Configurações de otimização específicas do formato
-
-**VideoFormatOptions:**
-- `quality?: number` - Qualidade para este formato (sobrescreve a global)
-- `preset?: string` - Preset para este formato (sobrescreve a global)
-
-**Exemplo:**
 ```ts
 optimizeVideos({
-  quality: 20,           // Fallback global
-  '.mp4': {
-    quality: 18,         // Sobrescrever para MP4
-    preset: 'slow'       // Sobrescrever preset para MP4
+  quality: 20, // Padrão global
+  exclude: ["intro.mp4"], // Ignorar arquivos
+  ".mp4": {
+    quality: 18, // Sobrescrever para mp4
+    preset: "slow", // Codificação mais lenta, melhor compressão
   },
-  '.webm': {
-    quality: 22          // Usa preset global: 'medium'
-  }
-})
+  ".webm": { quality: 25 },
+});
 ```
 
-### Formatos Suportados
+### Configuração
 
-- **.mp4** (codec H.264)
-- **.webm** (codec VP9)
-- **.mov** (codec H.264)
-- **.avi** (codec H.264)
+| Opção     | Tipo       | Padrão     | Descrição                                                      |
+| --------- | ---------- | ---------- | -------------------------------------------------------------- |
+| `quality` | `number`   | `18`       | Valor CRF. Menor = melhor qualidade/arquivo maior. Rec: 18-23. |
+| `preset`  | `string`   | `'medium'` | Velocidade: `fast`, `medium`, `slow`.                          |
+| `exclude` | `string[]` | `[]`       | Padrões/Extensões para pular (ex: `['intro', 'teste']`).       |
+| `.<ext>`  | `object`   | -          | Ajustes por formato (`.mp4`, `.webm`, `.mov`, `.avi`).         |
 
-### Observações
+> **Nota:** O áudio é removido dos vídeos otimizados.
 
-- Para `.webm`, é usado o codec VP9 com qualidade CRF e `-b:v 0`
-- O áudio é removido dos vídeos otimizados
-- Os arquivos são escritos de forma atômica (arquivo temporário com mesma extensão e substituição após sucesso)
-- Se você não especificar `quality` ou `preset`, os valores padrão serão usados automaticamente (quality: 18, preset: "medium")
-- O plugin só executa durante o processo de build (`apply: "build"`)
-- Os vídeos são otimizados in-place no diretório de build (dist)
+---
 
-### Como Funciona
-
-1. Durante o processo de build, o plugin detecta automaticamente o diretório de build (dist)
-2. Escaneia o diretório dist em busca de arquivos de vídeo
-3. Encontra todos os arquivos de vídeo que correspondem aos formatos suportados
-4. Aplica configurações de otimização específicas do formato ou globais
-5. Otimiza cada vídeo usando ffmpeg
-6. Substitui o arquivo original pela versão otimizada
-7. Registra os resultados da otimização (tamanhos de arquivo e percentual de redução)
-
-### Exemplo de Saída
-
-```
-🎬 Encontrados 3 arquivo(s) de vídeo para otimizar
-⚡ Otimizando: video1.mp4
-✅ video1.mp4: 15.23 MB → 8.45 MB (44.5% menor)
-⚡ Otimizando: video2.webm
-✅ video2.webm: 22.10 MB → 12.30 MB (44.3% menor)
-⚡ Otimizando: demo.mov
-✅ demo.mov: 45.67 MB → 28.90 MB (36.7% menor)
-🎉 Otimização de vídeos concluída!
-```
-
-### Requisitos
-
-- Node.js >= 16
-- Vite >= 4
-
-### Contribuindo
-
-Contribuições são bem-vindas! Este projeto está aberto para melhorias e colaboração. Aqui estão algumas formas de contribuir:
-
-#### Como Começar
-
-1. Faça um fork do repositório
-2. Crie uma branch de feature (`git checkout -b feature/nova-funcionalidade`)
-3. Faça suas alterações
-4. Faça commit das alterações (`git commit -m 'Adiciona nova funcionalidade'`)
-5. Faça push para a branch (`git push origin feature/nova-funcionalidade`)
-6. Abra um Pull Request
-
-#### Áreas para Contribuição
-
-- 🐛 Correção de bugs
-- ✨ Novas funcionalidades
-- 📝 Melhorias na documentação
-- 🧪 Cobertura adicional de testes
-- 🎨 Melhorias na qualidade do código
-- 🌍 Traduções
-- 📦 Otimizações de performance
-
-#### Ideias para Melhorias Futuras
-
-- [ ] Suporte para formatos adicionais de vídeo (mkv, flv, etc.)
-- [ ] Opção de preservação de áudio
-- [ ] Geração de thumbnails de vídeo
-- [ ] Processamento paralelo de vídeos
-- [ ] Relatório de progresso para lotes grandes
-- [ ] Mecanismo de cache para pular vídeos já otimizados
-- [ ] Opção de parâmetros customizados do ffmpeg
-- [ ] Opções de redimensionamento/resolução de vídeo
-- [ ] Suporte para múltiplos formatos de saída a partir de uma única entrada
-- [ ] Modo de desenvolvimento com suporte a watch
-- [ ] Melhor tratamento de erros e recuperação
-- [ ] Suporte para preservação de metadados de vídeo
-
-### Licença
+### License
 
 MIT
